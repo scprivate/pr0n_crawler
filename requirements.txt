@@ -1,0 +1,5 @@
+peewee
+colorlog
+lxml
+inflection
+aiohttp
