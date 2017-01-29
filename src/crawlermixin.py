@@ -102,9 +102,14 @@ class CrawlerMixin(object):
                     self.logger.debug('Got details for {}.'.format(video.url))
 
                     for found_tag in details.get('tags'):
+                        found_tag = parameterize(found_tag.strip())
+
+                        if not found_tag:
+                            continue
+
                         tag, created = Tag.get_or_create(
-                            tag=humanize(found_tag.strip()),
-                            slug=parameterize(found_tag.strip())
+                            tag=humanize(found_tag),
+                            slug=found_tag
                         )
 
                         # It's better than video.tags.add(tag), because it wont
