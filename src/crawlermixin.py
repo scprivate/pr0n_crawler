@@ -42,9 +42,10 @@ class CrawlerMixin(object):
                 self.logger.critical("Can't find videos from {}, after 20 try.".format(url))
                 exit(1)
 
+            delay = (20 - retry) ** 1.5 + 10
             retry -= 1
-            self.logger.warning('Found 0 videos on {}, {} try left, waiting 5 seconds...'.format(url, retry))
-            await asyncio.sleep(5)
+            self.logger.warning('Found 0 videos on {}, {} try left, waiting {} seconds...'.format(url, retry, delay))
+            await asyncio.sleep(delay)
             await self.crawl(url, retry)
         else:
             url = self.site_url + next_page
