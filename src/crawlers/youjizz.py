@@ -1,14 +1,14 @@
-from lib import helpers
-from lib.crawler import Crawler
+from src import helpers
+from src.crawlermixin import CrawlerMixin
 
 
-class YoujizzCrawler(Crawler):
+class YoujizzCrawler(CrawlerMixin):
     site_name = 'Youjizz'
     site_url = 'https://www.youjizz.com'
     site_favicon_url = site_url + '/favicon.ico'
 
-    crawler_entry_point = '/page/179.html'
-    crawler_max_videos = 10000
+    crawler_entry_point = '/page/1.html'
+    crawler_max_videos = 150
     crawler_selectors = dict(
         next_page='//*[@id="pagination"]/span/following-sibling::a[1]/@href',
 
