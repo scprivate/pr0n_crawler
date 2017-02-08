@@ -28,12 +28,6 @@ def create_logger() -> logging.Logger:
 
 
 if __name__ == '__main__':
-    try:
-        db.create_tables([Site, Video, Tag, VideoToTag])
-    except peewee.OperationalError:
-        # Database is already created
-        pass
-
     db.connect()
     db.create_tables([Site, Video, Tag, VideoToTag], safe=True)
     logger = create_logger()
