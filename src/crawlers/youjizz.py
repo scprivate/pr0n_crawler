@@ -8,14 +8,13 @@ class YoujizzCrawler(CrawlerMixin):
     site_favicon_url = site_url + '/favicon.ico'
 
     crawler_entry_point = '/page/1.html'
-    crawler_max_videos = 150
     crawler_selectors = dict(
-        next_page='//*[@id="pagination"]/span/following-sibling::a[1]/@href',
+        next_page='//*[@id="pagination"]/span/following-sibling::a/@href[1]',
 
         video=dict(
             title='//*[@id="title1"]/text()',
             duration='//*[@id="title2"]/span[1]/span/text()',
-            video_url='//*[@id="min"]/a/@href',
+            url='//*[@id="min"]/a/@href',
             thumbnail_url='//*[@id="min"]/img[@class="lazy"]/@data-original',
         ),
 

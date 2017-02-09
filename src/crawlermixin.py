@@ -14,7 +14,7 @@ class CrawlerMixin(object):
     site_url = None
     crawler_entry_point = None
     crawler_selectors = None
-    crawler_max_videos = 100
+    crawler_max_videos = 9000
 
     def __init__(self):
         self.crawler_current_videos = 0
