@@ -13,6 +13,7 @@ __all__ = [
 ]
 
 db = SqliteExtDatabase(os.path.join(os.path.dirname('..'), 'database.db'))
+db = SqliteExtDatabase(os.path.join(os.path.dirname('..'), 'database.sqlite'))
 
 
 class BaseModel(Model):
