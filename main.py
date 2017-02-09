@@ -36,11 +36,12 @@ if __name__ == '__main__':
         YoujizzCrawler(),
     ]
 
+    loop = asyncio.get_event_loop()
+
     try:
-        loop = asyncio.get_event_loop()
         tasks = [crawler.crawl() for crawler in crawlers]
         loop.run_until_complete(asyncio.wait(tasks))
     except KeyboardInterrupt:
-        print('Bye.')
+        loop.close()
     except aiohttp.errors.ClientOSError as e:
         print(e)
