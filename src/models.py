@@ -1,6 +1,5 @@
 import os
 
-from inflection import pluralize, parameterize
 from peewee import *
 from playhouse.fields import ManyToManyField
 from playhouse.sqlite_ext import SqliteExtDatabase
@@ -13,29 +12,22 @@ __all__ = [
     'VideoToTag'
 ]
 
-db = SqliteExtDatabase(os.path.join(os.path.dirname('..'), 'database.sqlite'))
-
-
-def normalize_model_name(name):
-    return parameterize(pluralize(name))
+db = SqliteExtDatabase(
+    os.path.join(os.path.dirname('..'), 'database.sqlite')
+)
 
 
 class BaseModel(Model):
     class Meta:
         database = db
-        db_table_func = lambda model: normalize_model_name(model.__name__)
 
 
 class Site(BaseModel):
-    db_column = 'sites'
-
     name = CharField()
     url = CharField()
 
 
 class Tag(BaseModel):
-    db_column = 'tags'
-
     tag = CharField()
     slug = CharField()
 

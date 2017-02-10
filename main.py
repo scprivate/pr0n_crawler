@@ -5,7 +5,6 @@ import sys
 
 import aiohttp
 import colorlog
-import peewee
 
 from src.crawlers.youjizz import YoujizzCrawler
 from src.models import db, Site, Video, Tag, VideoToTag
@@ -19,7 +18,7 @@ def create_logger() -> logging.Logger:
     ch.setLevel(logging.INFO)
 
     ch.setFormatter(colorlog.ColoredFormatter(
-        '[ %(log_color)s%(levelname)s %(reset)s] %(bold)s%(site_name)s%(reset)s'
+        '[%(log_color)s%(levelname)s %(reset)s] %(bold)s%(site_name)s%(reset)s'
         ' (%(videos_current_number)s/%(videos_max_number)s) : %(message)s'
     ))
 
