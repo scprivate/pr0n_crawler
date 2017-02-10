@@ -3,8 +3,7 @@ import asyncio
 import logging
 import sys
 
-import aiohttp
-import colorlog
+from colorlog import ColoredFormatter
 
 from src.crawlers.youjizz import YoujizzCrawler
 from src.models import db, Site, Video, Tag, VideoToTag
@@ -17,7 +16,7 @@ def create_logger() -> logging.Logger:
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.INFO)
 
-    ch.setFormatter(colorlog.ColoredFormatter(
+    ch.setFormatter(ColoredFormatter(
         '[%(log_color)s%(levelname)s %(reset)s] %(bold)s%(site_name)s%(reset)s'
         ' (%(videos_current_number)s/%(videos_max_number)s) : %(message)s'
     ))
@@ -42,5 +41,3 @@ if __name__ == '__main__':
         loop.run_until_complete(asyncio.wait(tasks))
     except KeyboardInterrupt:
         loop.close()
-    except aiohttp.errors.ClientOSError as e:
-        print(e)

@@ -1,7 +1,6 @@
 import os
 
-from peewee import *
-from playhouse.fields import ManyToManyField
+from playhouse.fields import ManyToManyField, Model, CharField, ForeignKeyField, IntegerField
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 __all__ = [

@@ -1,20 +1,21 @@
 import asyncio
 import logging
 import time
-from typing import Dict, List
+from typing import Dict, List, Tuple, Any
 
 import aiohttp
 from inflection import humanize, parameterize
 from lxml import html
+from lxml.html import Element
 
 from src.models import Video, Site, Tag, VideoToTag
 
 
 class CrawlerMixin(object):
-    site_name = None
-    site_url = None
-    crawler_entry_point = None
-    crawler_selectors = None
+    site_name = ''
+    site_url = ''
+    crawler_entry_point = ''
+    crawler_selectors: Dict[str, Any] = dict()
     crawler_max_videos = 9000
 
     already_existing_videos_count = 0
@@ -50,9 +51,11 @@ class CrawlerMixin(object):
         time_start = time.time()
         videos = await self._find_videos_from_videos_page(tree)
         time_end = time.time()
-        self.logger.info('Found videos metadata for {} videos in {:.3f} seconds.'.format(
-            len(videos),
-            time_end - time_start)
+
+        self.logger.info(
+            'Found videos metadata for {} videos in {:.3f} seconds.'.format(
+                len(videos),
+                time_end - time_start)
         )
 
         # 3: find next page url from previously downloaded page
@@ -65,7 +68,12 @@ class CrawlerMixin(object):
 
             delay = (20 - retry) ** 1.5 + 10
             retry -= 1
-            self.logger.warning('Found 0 videos on {}, {} try left, waiting {} seconds...'.format(url, retry, delay))
+            self.logger.warning(
+                'Found 0 videos on {}, {} try left, waiting {} seconds...'.format(
+                    url, retry, delay
+                )
+            )
+
             await asyncio.sleep(delay)
             await self.crawl(url, retry)
         else:
@@ -101,7 +109,7 @@ class CrawlerMixin(object):
                 else:
                     self.logger.info('Downloaded in {:.3f} seconds.'.format(time.time() - time_start))
                     content = await response.text()
-                    tree = html.fromstring(content)
+                    tree: Element = html.fromstring(content)
                     return [content, tree]
 
     async def _find_videos_from_videos_page(self, tree):
@@ -111,13 +119,14 @@ class CrawlerMixin(object):
 
         return videos
 
-    def _find_videos_metadata(self, tree) -> [list]:
+    def _find_videos_metadata(self, tree) -> List[Tuple[List[str], List[int], List[str], List[str]]]:
         titles = find_videos_title(tree, self.video_title_selector)
         urls = find_videos_url(tree, self.video_url_selector)
         thumbnail_urls = find_videos_thumbnail_url(tree, self.video_thumbnail_url_selector)
-
-        durations = find_videos_duration(tree, self.video_duration_selector)
-        durations = [self.crawl_convert_video_duration_to_seconds(d) for d in durations]
+        durations: List[int] = map(
+            self.crawl_convert_video_duration_to_seconds,
+            find_videos_duration(tree, self.video_duration_selector)
+        )
 
         return list(zip(titles, durations, urls, thumbnail_urls))
 
@@ -153,7 +162,7 @@ class CrawlerMixin(object):
                 self.crawler_current_videos += 1
                 self._hydrate_logger()
 
-    def _get_or_create_videos_from_metadata(self, videos_metadata):
+    def _get_or_create_videos_from_metadata(self, videos_metadata) -> List[Video]:
         videos = []
 
         for m in videos_metadata:
@@ -172,43 +181,43 @@ class CrawlerMixin(object):
         return videos
 
     @property
-    def video_title_selector(self):
+    def video_title_selector(self) -> str:
         return self.crawler_selectors.get('video').get('title')
 
     @property
-    def video_duration_selector(self):
+    def video_duration_selector(self) -> str:
         return self.crawler_selectors.get('video').get('duration')
 
     @property
-    def video_url_selector(self):
+    def video_url_selector(self) -> str:
         return self.crawler_selectors.get('video').get('url')
 
     @property
-    def video_thumbnail_url_selector(self):
+    def video_thumbnail_url_selector(self) -> str:
         return self.crawler_selectors.get('video').get('thumbnail_url')
 
     @property
-    def video_details_tags_selector(self):
+    def video_details_tags_selector(self) -> str:
         return self.crawler_selectors.get('video_details').get('tags')
 
     @property
-    def next_page_selector(self):
+    def next_page_selector(self) -> str:
         return self.crawler_selectors.get('next_page')
 
 
-def find_videos_title(tree, video_title_selector) -> [str]:
+def find_videos_title(tree: Element, video_title_selector: str) -> List[str]:
     return tree.xpath(video_title_selector)
 
 
-def find_videos_duration(tree, video_duration_selector) -> [int]:
+def find_videos_duration(tree: Element, video_duration_selector: str) -> List[str]:
     return tree.xpath(video_duration_selector)
 
 
-def find_videos_url(tree, video_url_selector) -> [str]:
+def find_videos_url(tree: Element, video_url_selector: str) -> List[str]:
     return tree.xpath(video_url_selector)
 
 
-def find_videos_thumbnail_url(tree, video_thumbnail_url_selector) -> [str]:
+def find_videos_thumbnail_url(tree: Element, video_thumbnail_url_selector: str) -> List[str]:
     return tree.xpath(video_thumbnail_url_selector)
 
 
