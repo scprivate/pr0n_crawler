@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+from typing import Dict, List
 
 import aiohttp
 from inflection import humanize, parameterize
@@ -16,18 +17,22 @@ class CrawlerMixin(object):
     crawler_selectors = None
     crawler_max_videos = 9000
 
+    already_existing_videos_count = 0
+
     def __init__(self):
         self.crawler_current_videos = 0
         self._hydrate_logger()
         self.logger.debug('__init__()')
 
-        self.site, created = Site.get_or_create(name=self.site_name, url=self.site_url)
+        self.site, created = Site.get_or_create(
+            name=self.site_name,
+            url=self.site_url
+        )
+
         if created:
             self.logger.info('Site created.')
 
     async def crawl(self, url=None, retry=20):
-        self.logger.debug('crawl()')
-
         if not url:
             url = self.site_url + self.crawler_entry_point
 
@@ -35,7 +40,23 @@ class CrawlerMixin(object):
             self.logger.info('Max videos number reached, end.')
             return
 
-        [videos, next_page] = await self._download_videos_page(url)
+        prev_already_existing_videos_count = self.already_existing_videos_count
+
+        # 1: download videos page
+        [content, tree] = await self._download_videos_page(url)
+
+        # 2: find videos from previously downloaded page
+        self.logger.info('Finding videos metadata from {}...'.format(url))
+        time_start = time.time()
+        videos = await self._find_videos_from_videos_page(tree)
+        time_end = time.time()
+        self.logger.info('Found videos metadata for {} videos in {:.3f} seconds.'.format(
+            len(videos),
+            time_end - time_start)
+        )
+
+        # 3: find next page url from previously downloaded page
+        next_page = find_next_page(tree, self.next_page_selector)
 
         if not videos or len(videos) == 0:
             if retry == 0:
@@ -48,9 +69,13 @@ class CrawlerMixin(object):
             await asyncio.sleep(delay)
             await self.crawl(url, retry)
         else:
-            url = self.site_url + next_page
             self.logger.info('-' * 60)
 
+            if self.already_existing_videos_count == prev_already_existing_videos_count:
+                self.logger.info('0 videos were created from last crawl, now exiting...')
+                return
+
+            url = self.site_url + next_page
             await self.crawl(url)
 
     async def crawl_convert_video_duration_to_seconds(self, duration: str):
@@ -75,147 +100,139 @@ class CrawlerMixin(object):
                     exit(1)
                 else:
                     self.logger.info('Downloaded in {:.3f} seconds.'.format(time.time() - time_start))
-                    return await self._parse_videos_page_response(response)
+                    content = await response.text()
+                    tree = html.fromstring(content)
+                    return [content, tree]
 
-    async def _download_video_page_and_find_details(self, videos: [Video, bool]) -> [Video]:
-        self.logger.debug('_fetch_videos_details()')
+    async def _find_videos_from_videos_page(self, tree):
+        videos_metadata = self._find_videos_metadata(tree)
+        videos = self._get_or_create_videos_from_metadata(videos_metadata)
+        await self._find_more_videos_metadata(videos)
 
+        return videos
+
+    def _find_videos_metadata(self, tree) -> [list]:
+        titles = find_videos_title(tree, self.video_title_selector)
+        urls = find_videos_url(tree, self.video_url_selector)
+        thumbnail_urls = find_videos_thumbnail_url(tree, self.video_thumbnail_url_selector)
+
+        durations = find_videos_duration(tree, self.video_duration_selector)
+        durations = [self.crawl_convert_video_duration_to_seconds(d) for d in durations]
+
+        return list(zip(titles, durations, urls, thumbnail_urls))
+
+    async def _find_more_videos_metadata(self, videos: List[Video]):
         tasks = []
 
-        for [video, _] in videos:
+        for video in videos:
             tasks.append(self._download_video_page(video))
 
-        return await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
 
     async def _download_video_page(self, video: Video):
         url = self.site_url + video.url
-
-        self.logger.debug('Download details for {}.'.format(video.url))
+        self.logger.info('Downloading {}...'.format(url))
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 if response.status == 404:
                     self.logger.warning('Can not download {}'.format(url))
-                else:
-                    details = await self._find_video_details(response)
+                    return
 
-                    self.logger.debug('Got details for {}.'.format(video.url))
+                content = await response.text()
+                self.logger.info('Downloaded {}.'.format(url))
+                tree = html.fromstring(content)
 
-                    for found_tag in details.get('tags'):
-                        found_tag = parameterize(found_tag.strip())
+                details = find_video_details(tree, dict(
+                    video_details_tags=self.video_details_tags_selector
+                ))
 
-                        if not found_tag:
-                            continue
+                save_video_details(video, details)
 
-                        tag, created = Tag.get_or_create(
-                            tag=humanize(found_tag),
-                            slug=found_tag
-                        )
+                self.logger.info('Got details from {}'.format(url))
+                self.crawler_current_videos += 1
+                self._hydrate_logger()
 
-                        # It's better than video.tags.add(tag), because it wont
-                        # raises à peewee.IntegrityError if relation between
-                        # Video and Tag already exists.
-                        VideoToTag.get_or_create(video=video, tag=tag)
+    def _get_or_create_videos_from_metadata(self, videos_metadata):
+        videos = []
 
-                    self.logger.debug('Saved {} in database')
-                    self.crawler_current_videos += 1
-                    self._hydrate_logger()
+        for m in videos_metadata:
+            video, created = Video.get_or_create(
+                title=m[0].strip(),
+                duration=m[1],
+                url=m[2].strip(),
+                thumbnail_url=m[3].strip(),
+                site=self.site
+            )
+            videos.append(video)
 
-            return video
-
-    async def _parse_videos_page_response(self, response):
-        content = await response.text()
-        tree = html.fromstring(content)
-
-        return [
-            await self._find_videos_from_videos_page(response, tree),
-            await self._find_next_page(response, tree),
-        ]
-
-    async def _find_videos_from_videos_page(self, response, tree):
-        self.logger.debug('_find_videos_from_videos_page()')
-
-        # 1: find videos
-        time_start = time.time()
-        self.logger.info('Finding videos from {}...'.format(response.url))
-        videos = await self._find_videos_metadata(tree)
-        self.logger.info('Found {} videos in {:.3f} seconds.'.format(len(videos), time.time() - time_start))
-
-        # 2: find videos details
-        time_start = time.time()
-        self.logger.info('Finding details for {} videos.'.format(len(videos)))
-        videos = await self._download_video_page_and_find_details(videos)
-        time_end = time.time()
-        self.logger.info('Found details for {} videos in {:.3f} seconds.'.format(len(videos), time_end - time_start))
+            if created:
+                self.already_existing_videos_count += 1
 
         return videos
 
-    async def _find_videos_metadata(self, tree) -> [dict]:
-        self.logger.debug('_find_videos()')
+    @property
+    def video_title_selector(self):
+        return self.crawler_selectors.get('video').get('title')
 
-        # Faster than asyncio.gather(...)
-        videos_metadata = zip(
-            await self._find_videos_titles(tree),
-            await self._find_videos_duration(tree),
-            await self._find_videos_url(tree),
-            await self._find_videos_thumbnail_url(tree),
+    @property
+    def video_duration_selector(self):
+        return self.crawler_selectors.get('video').get('duration')
+
+    @property
+    def video_url_selector(self):
+        return self.crawler_selectors.get('video').get('url')
+
+    @property
+    def video_thumbnail_url_selector(self):
+        return self.crawler_selectors.get('video').get('thumbnail_url')
+
+    @property
+    def video_details_tags_selector(self):
+        return self.crawler_selectors.get('video_details').get('tags')
+
+    @property
+    def next_page_selector(self):
+        return self.crawler_selectors.get('next_page')
+
+
+def find_videos_title(tree, video_title_selector) -> [str]:
+    return tree.xpath(video_title_selector)
+
+
+def find_videos_duration(tree, video_duration_selector) -> [int]:
+    return tree.xpath(video_duration_selector)
+
+
+def find_videos_url(tree, video_url_selector) -> [str]:
+    return tree.xpath(video_url_selector)
+
+
+def find_videos_thumbnail_url(tree, video_thumbnail_url_selector) -> [str]:
+    return tree.xpath(video_thumbnail_url_selector)
+
+
+def find_video_details(tree, selectors: Dict[str, str]) -> Dict[str, list]:
+    return dict(
+        tags=tree.xpath(selectors.get('video_details_tags'))
+    )
+
+
+def find_next_page(tree, next_page_selector: str) -> str:
+    return tree.xpath(next_page_selector)[0]
+
+
+def save_video_details(video: Video, details: Dict):
+    for found_tag in details.get('tags'):
+        slug = parameterize(found_tag.strip())
+        tag = humanize(slug)
+
+        if not slug:
+            continue
+
+        tag, created = Tag.get_or_create(
+            tag=tag,
+            slug=slug
         )
 
-        # tasks = [
-        #     self._find_videos_titles(tree),
-        #     self._find_videos_duration(tree),
-        #     self._find_videos_url(tree),
-        #     self._find_videos_thumbnail_url(tree),
-        # ]
-        #
-        # metadatas = await asyncio.gather(*tasks)
-        # metadatas = [list(t) for t in zip(*metadatas)]
-
-        return [
-            Video.get_or_create(
-                title=videos_metadata[0].strip(), duration=videos_metadata[1],
-                url=videos_metadata[2].strip(), thumbnail_url=videos_metadata[3].strip(),
-                site=self.site
-            )
-            for videos_metadata in videos_metadata
-            ]
-
-    async def _find_video_details(self, response):
-        content = await response.text()
-        tree = html.fromstring(content)
-
-        video_details_selectors = self.crawler_selectors.get('video_details')
-
-        return dict(
-            tags=tree.xpath(video_details_selectors.get('tags'))
-        )
-
-    async def _find_next_page(self, response, tree):
-        self.logger.debug('_find_next_page_url()')
-
-        try:
-            next_page = tree.xpath(self.crawler_selectors.get('next_page'))[0]
-            return next_page
-        except IndexError as e:
-            self.logger.critical('Error when trying to get next page: {}'.format(e))
-
-    async def _find_videos_titles(self, tree) -> [str]:
-        self.logger.debug('_find_videos_titles()')
-
-        return tree.xpath(self.crawler_selectors.get('video').get('title'))
-
-    async def _find_videos_duration(self, tree) -> [int]:
-        self.logger.debug('_find_videos_duration()')
-
-        durations = tree.xpath(self.crawler_selectors.get('video').get('duration'))
-        return [self.crawl_convert_video_duration_to_seconds(duration) for duration in durations]
-
-    async def _find_videos_url(self, tree) -> [str]:
-        self.logger.debug('_find_videos_url()')
-
-        return tree.xpath(self.crawler_selectors.get('video').get('video_url'))
-
-    async def _find_videos_thumbnail_url(self, tree) -> [str]:
-        self.logger.debug('_find_videos_thumbnail_url()')
-
-        return tree.xpath(self.crawler_selectors.get('video').get('thumbnail_url'))
+        VideoToTag.get_or_create(video=video, tag=tag)
