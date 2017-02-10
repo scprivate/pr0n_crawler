@@ -7,13 +7,13 @@ Actually supports YouJizz.
 Requirements
 ------------
 
-- Python 3.5+
+- Python 3.6+
 
 Installation
 ------------
 
 ```bash
-$ mkvirtualenv pr0n_crawler --python=/usr/bin/python3.5
+$ mkvirtualenv pr0n_crawler --python=/usr/bin/python3.6
 $ pip install -r requirements.txt
 ```
 
