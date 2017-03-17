@@ -7,7 +7,7 @@ Actually supports YouJizz.
 Requirements
 ------------
 
-- Python 3.6+
+- Python 3.5+
 - MySQL 5.5+
 
 Installation

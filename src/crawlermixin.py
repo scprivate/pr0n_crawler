@@ -1,21 +1,19 @@
 import asyncio
 import logging
 import time
-from typing import Dict, List, Tuple, Any
 
 import aiohttp
 from inflection import humanize, parameterize
 from lxml import html
-from lxml.html import Element
 
 from src.models import Video, Site, Tag, VideoTag
 
 
 class CrawlerMixin(object):
-    site_name: str = None
-    site_url: str = None
-    crawler_entry_point: str = None
-    crawler_selectors: Dict[str, Any] = dict()
+    site_name = None  # type: str
+    site_url = None  # type: str
+    crawler_entry_point = None  # type: str
+    crawler_selectors = dict()  # type: dict[str, str | dict[str, str]]
     crawler_max_videos = 9000
 
     already_existing_videos_count = 0
@@ -23,7 +21,6 @@ class CrawlerMixin(object):
     def __init__(self):
         self.crawler_current_videos = 0
         self._hydrate_logger()
-        self.logger.debug('__init__()')
 
         if not (self.site_name or self.site_url):
             raise ValueError("Site's name and site's url should not be None.")
@@ -37,6 +34,12 @@ class CrawlerMixin(object):
             self.logger.info('Site created.')
 
     async def crawl(self, url=None, retry=20):
+        """
+        :type url: str
+        :type retry: int
+        :return:
+        """
+
         if not url:
             url = self.site_url + self.crawler_entry_point
 
@@ -90,7 +93,12 @@ class CrawlerMixin(object):
             url = self.site_url + next_page
             await self.crawl(url)
 
-    async def crawl_convert_video_duration_to_seconds(self, duration: str):
+    async def crawl_convert_video_duration_to_seconds(self, duration):
+        """
+        :type duration: str
+        :rtype: int
+        """
+
         raise NotImplementedError
 
     def _hydrate_logger(self):
@@ -101,7 +109,11 @@ class CrawlerMixin(object):
         })
 
     async def _download_videos_page(self, url):
-        self.logger.debug('_download_videos_page()')
+        """
+        :type url: str
+        :rtype: list[str, lxml.html.Element]
+        """
+
         self.logger.info('Downloading {}...'.format(url))
 
         time_start = time.time()
@@ -113,36 +125,77 @@ class CrawlerMixin(object):
                 else:
                     self.logger.info('Downloaded in {:.3f} seconds.'.format(time.time() - time_start))
                     content = await response.text()
-                    tree: Element = html.fromstring(content)
+                    tree = html.fromstring(content)
                     return [content, tree]
 
     async def _find_videos_from_videos_page(self, tree):
-        videos_metadata = self._find_videos_metadata(tree)
+        """
+        :type tree: lxml.html.Element
+        :rtype: list[Video]
+        """
+
+        videos_metadata = self._fetch_videos_page_and_find_metadata(tree)
         videos = self._get_or_create_videos_from_metadata(videos_metadata)
         await self._find_more_videos_metadata(videos)
 
         return videos
 
-    def _find_videos_metadata(self, tree) -> List[Tuple[List[str], List[int], List[str], List[str]]]:
+    def _fetch_videos_page_and_find_metadata(self, tree):
+        """
+        :param tree: lxml.html.Element
+        :return: list of tuples following (title, url, thumbnail_url, durations) format
+        :rtype: list[(str, str, str, int)]
+        """
+
         titles = find_videos_title(tree, self.video_title_selector)
         urls = find_videos_url(tree, self.video_url_selector)
         thumbnail_urls = find_videos_thumbnail_url(tree, self.video_thumbnail_url_selector)
-        durations: List[int] = map(
+        durations = map(
             self.crawl_convert_video_duration_to_seconds,
             find_videos_duration(tree, self.video_duration_selector)
         )
 
-        return list(zip(titles, durations, urls, thumbnail_urls))
+        return list(zip(titles, urls, thumbnail_urls, durations))
 
-    async def _find_more_videos_metadata(self, videos: List[Video]):
+    def _get_or_create_videos_from_metadata(self, videos_metadata):
+        """
+        :type videos_metadata: list[(str, str, str, int)]
+        :rtype: list[Video]
+        """
+        videos = []
+
+        for m in videos_metadata:
+            video, created = Video.get_or_create(
+                title=m[0].strip(),
+                url=m[1].strip(),
+                thumbnail_url=m[2].strip(),
+                duration=m[3],
+                site=self.site
+            )
+            videos.append(video)
+
+            if created:
+                self.already_existing_videos_count += 1
+
+        return videos
+
+    async def _find_more_videos_metadata(self, videos):
+        """
+        :param videos: list[Video]
+        """
+
         tasks = []
 
         for video in videos:
-            tasks.append(self._download_video_page(video))
+            tasks.append(self._fetch_video_page_and_find_metadata(video))
 
         await asyncio.gather(*tasks)
 
-    async def _download_video_page(self, video: Video):
+    async def _fetch_video_page_and_find_metadata(self, video):
+        """
+        :type video: Video
+        """
+
         url = self.site_url + video.url
         self.logger.info('Downloading {}...'.format(url))
 
@@ -166,76 +219,117 @@ class CrawlerMixin(object):
                 self.crawler_current_videos += 1
                 self._hydrate_logger()
 
-    def _get_or_create_videos_from_metadata(self, videos_metadata) -> List[Video]:
-        videos = []
-
-        for m in videos_metadata:
-            video, created = Video.get_or_create(
-                title=m[0].strip(),
-                duration=m[1],
-                url=m[2].strip(),
-                thumbnail_url=m[3].strip(),
-                site=self.site
-            )
-            videos.append(video)
-
-            if created:
-                self.already_existing_videos_count += 1
-
-        return videos
-
     @property
-    def video_title_selector(self) -> str:
+    def video_title_selector(self):
+        """
+        :rtype: str
+        """
         return self.crawler_selectors.get('video').get('title')
 
     @property
-    def video_duration_selector(self) -> str:
+    def video_duration_selector(self):
+        """
+        :rtype: str
+        """
         return self.crawler_selectors.get('video').get('duration')
 
     @property
-    def video_url_selector(self) -> str:
+    def video_url_selector(self):
+        """
+        :rtype: str
+        """
         return self.crawler_selectors.get('video').get('url')
 
     @property
-    def video_thumbnail_url_selector(self) -> str:
+    def video_thumbnail_url_selector(self):
+        """
+        :rtype: str
+        """
         return self.crawler_selectors.get('video').get('thumbnail_url')
 
     @property
-    def video_details_tags_selector(self) -> str:
+    def video_details_tags_selector(self):
+        """
+        :rtype: str
+        """
         return self.crawler_selectors.get('video_details').get('tags')
 
     @property
-    def next_page_selector(self) -> str:
+    def next_page_selector(self):
+        """
+        :rtype: str
+        """
         return self.crawler_selectors.get('next_page')
 
 
-def find_videos_title(tree: Element, video_title_selector: str) -> List[str]:
+def find_videos_title(tree, video_title_selector):
+    """
+    :type tree: lxml.html.Element
+    :type video_title_selector: str
+    :rtype: list[str]
+    """
+
     return tree.xpath(video_title_selector)
 
 
-def find_videos_duration(tree: Element, video_duration_selector: str) -> List[str]:
+def find_videos_duration(tree, video_duration_selector):
+    """
+    :type tree: lxml.html.Element
+    :type video_duration_selector: str
+    :rtype: list[str]
+    """
+
     return tree.xpath(video_duration_selector)
 
 
-def find_videos_url(tree: Element, video_url_selector: str) -> List[str]:
+def find_videos_url(tree, video_url_selector):
+    """
+    :type tree: lxml.html.Element
+    :type video_url_selector: str
+    :rtype: list[str]
+    """
+
     return tree.xpath(video_url_selector)
 
 
-def find_videos_thumbnail_url(tree: Element, video_thumbnail_url_selector: str) -> List[str]:
+def find_videos_thumbnail_url(tree, video_thumbnail_url_selector):
+    """
+    :type tree: lxml.html.Element
+    :type video_thumbnail_url_selector: str
+    :rtype: list[str]
+    """
+
     return tree.xpath(video_thumbnail_url_selector)
 
 
-def find_video_details(tree, selectors: Dict[str, str]) -> Dict[str, list]:
+def find_video_details(tree, selectors):
+    """
+    :type tree: lxml.html.Element
+    :type selectors: dict[str, str]
+    :rtype: dict[str, list]
+    """
+
     return dict(
         tags=tree.xpath(selectors.get('video_details_tags'))
     )
 
 
-def find_next_page(tree, next_page_selector: str) -> str:
+def find_next_page(tree, next_page_selector):
+    """
+    :type tree: lxml.html.Element
+    :type next_page_selector: str
+    :rtype: str
+    """
+
     return tree.xpath(next_page_selector)[0]
 
 
-def save_video_details(video: Video, details: Dict):
+def save_video_details(video, details):
+    """
+    :type video: Video
+    :type details: dict
+    """
+
     for found_tag in details.get('tags'):
         slug = parameterize(found_tag.strip())
         tag = humanize(slug)
