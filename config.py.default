@@ -1,0 +1,6 @@
+DATABASE = {
+    'DATABASE': 'foo',
+    'USER': 'root',
+    'PASSWORD': 'root',
+    'CHARSET': 'utf8mb4'
+}

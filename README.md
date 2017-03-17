@@ -1,13 +1,14 @@
 pr0n_crawler
 ============
 
-Crawls a list of pr0n sites and saves videos' metadata in a SQLite database.
+Crawls a list of pr0n web sites and saves videos' metadata in a MySQL database.
 Actually supports YouJizz.
 
 Requirements
 ------------
 
 - Python 3.6+
+- MySQL 5.5+
 
 Installation
 ------------
@@ -15,6 +16,7 @@ Installation
 ```bash
 $ mkvirtualenv pr0n_crawler --python=/usr/bin/python3.6
 $ pip install -r requirements.txt
+$ cp config.py.default config.py # edit
 ```
 
 Usage
@@ -22,5 +24,4 @@ Usage
 
 ```bash
 $ ./main.py
-$ sqlite3 database.sqlite
 ```

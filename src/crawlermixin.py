@@ -8,7 +8,7 @@ from inflection import humanize, parameterize
 from lxml import html
 from lxml.html import Element
 
-from src.models import Video, Site, Tag, VideoToTag
+from src.models import Video, Site, Tag, VideoTag
 
 
 class CrawlerMixin(object):
@@ -244,4 +244,4 @@ def save_video_details(video: Video, details: Dict):
             slug=slug
         )
 
-        VideoToTag.get_or_create(video=video, tag=tag)
+        VideoTag.get_or_create(video=video, tag=tag)
