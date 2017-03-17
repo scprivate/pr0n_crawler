@@ -6,7 +6,7 @@ import sys
 from colorlog import ColoredFormatter
 
 from src.crawlers.youjizz import YoujizzCrawler
-from src.models import db, Site, Video, Tag, VideoToTag
+from src.models import db, Site, Video, Tag, VideoTag
 
 
 def create_logger() -> logging.Logger:
@@ -17,7 +17,7 @@ def create_logger() -> logging.Logger:
     ch.setLevel(logging.INFO)
 
     ch.setFormatter(ColoredFormatter(
-        '[%(log_color)s%(levelname)s %(reset)s] %(bold)s%(site_name)s%(reset)s'
+        '[%(log_color)s%(levelname)s%(reset)s] %(bold)s%(site_name)s%(reset)s'
         ' (%(videos_current_number)s/%(videos_max_number)s) : %(message)s'
     ))
 
@@ -27,14 +27,14 @@ def create_logger() -> logging.Logger:
 
 if __name__ == '__main__':
     db.connect()
-    db.create_tables([Site, Video, Tag, VideoToTag], safe=True)
+    db.create_tables([Site, Video, Tag, VideoTag], safe=True)
     logger = create_logger()
+
+    loop = asyncio.get_event_loop()
 
     crawlers = [
         YoujizzCrawler(),
     ]
-
-    loop = asyncio.get_event_loop()
 
     try:
         tasks = [crawler.crawl() for crawler in crawlers]

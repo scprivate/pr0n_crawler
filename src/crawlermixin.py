@@ -12,9 +12,9 @@ from src.models import Video, Site, Tag, VideoTag
 
 
 class CrawlerMixin(object):
-    site_name = ''
-    site_url = ''
-    crawler_entry_point = ''
+    site_name: str = None
+    site_url: str = None
+    crawler_entry_point: str = None
     crawler_selectors: Dict[str, Any] = dict()
     crawler_max_videos = 9000
 
@@ -24,6 +24,9 @@ class CrawlerMixin(object):
         self.crawler_current_videos = 0
         self._hydrate_logger()
         self.logger.debug('__init__()')
+
+        if not (self.site_name or self.site_url):
+            raise ValueError("Site's name and site's url should not be None.")
 
         self.site, created = Site.get_or_create(
             name=self.site_name,
@@ -44,7 +47,7 @@ class CrawlerMixin(object):
         prev_already_existing_videos_count = self.already_existing_videos_count
 
         # 1: download videos page
-        [content, tree] = await self._download_videos_page(url)
+        [_, tree] = await self._download_videos_page(url)
 
         # 2: find videos from previously downloaded page
         self.logger.info('Finding videos metadata from {}...'.format(url))
@@ -58,11 +61,9 @@ class CrawlerMixin(object):
                 time_end - time_start)
         )
 
-        # 3: find next page url from previously downloaded page
-        next_page = find_next_page(tree, self.next_page_selector)
-
-        if not videos or len(videos) == 0:
-            if retry == 0:
+        # 3: check if there is videos
+        if not videos:
+            if not retry:
                 self.logger.critical("Can't find videos from {}, after 20 try.".format(url))
                 exit(1)
 
@@ -77,6 +78,9 @@ class CrawlerMixin(object):
             await asyncio.sleep(delay)
             await self.crawl(url, retry)
         else:
+            # 4: find next page url from previously downloaded page
+            next_page = find_next_page(tree, self.next_page_selector)
+
             self.logger.info('-' * 60)
 
             if self.already_existing_videos_count == prev_already_existing_videos_count:
