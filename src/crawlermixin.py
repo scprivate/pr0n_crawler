@@ -5,12 +5,7 @@ import time
 import aiohttp
 from inflection import humanize, parameterize
 from lxml import html
-from tenacity import before_log
-from tenacity import retry
-from tenacity import retry_if_exception_type
-from tenacity import stop_after_attempt
-from tenacity import wait_exponential
-from tenacity import wait_fixed
+from tenacity import before_log, retry, stop_after_attempt, wait_random
 
 from src.models import Video, Site, Tag, VideoTag
 
@@ -40,7 +35,7 @@ class CrawlerMixin(object):
             self.logger.info('Site created.')
 
     @retry(
-        stop=stop_after_attempt(20), wait=wait_fixed(5) + wait_exponential(multiplier=1, max=10),
+        stop=stop_after_attempt(20), wait=wait_random(32, 4096),
         before=before_log(logging.getLogger(), logging.WARN)
     )
     async def crawl(self, url=None):
@@ -188,7 +183,7 @@ class CrawlerMixin(object):
         await asyncio.gather(*tasks)
 
     @retry(
-        stop=stop_after_attempt(20), wait=wait_fixed(5) + wait_exponential(multiplier=1, max=10),
+        stop=stop_after_attempt(20), wait=wait_random(32, 4096),
         before=before_log(logging.getLogger(), logging.WARN)
     )
     async def _fetch_video_page_and_find_metadata(self, video):
