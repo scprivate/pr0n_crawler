@@ -10,8 +10,13 @@ __all__ = [
     'VideoTag'
 ]
 
-db = MySQLDatabase(database=DATABASE.get('DATABASE'), charset=DATABASE.get('CHARSET'),
-                   user=DATABASE.get('USER'), password=DATABASE.get('PASSWORD'))
+db = MySQLDatabase(
+    host=DATABASE.get('HOST'),
+    database=DATABASE.get('DATABASE'),
+    charset=DATABASE.get('CHARSET'),
+    user=DATABASE.get('USER'),
+    password=DATABASE.get('PASSWORD')
+)
 
 
 class Site(Model):
