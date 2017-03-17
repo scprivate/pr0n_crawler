@@ -134,6 +134,6 @@ class TestCrawler(AioHTTPTestCase):
     async def test_find_videos_metadata(self):
         self.skipTest('Not completed')
 
-        fake_crawler = FakeCrawler()
-        request = await self.client.request('GET', '/')
-        text = await request.text()
+        # fake_crawler = FakeCrawler()
+        # request = await self.client.request('GET', '/')
+        # text = await request.text()
