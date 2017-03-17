@@ -5,6 +5,12 @@ import time
 import aiohttp
 from inflection import humanize, parameterize
 from lxml import html
+from tenacity import before_log
+from tenacity import retry
+from tenacity import retry_if_exception_type
+from tenacity import stop_after_attempt
+from tenacity import wait_exponential
+from tenacity import wait_fixed
 
 from src.models import Video, Site, Tag, VideoTag
 
@@ -33,10 +39,13 @@ class CrawlerMixin(object):
         if created:
             self.logger.info('Site created.')
 
-    async def crawl(self, url=None, retry=20):
+    @retry(
+        stop=stop_after_attempt(20), wait=wait_fixed(5) + wait_exponential(multiplier=1, max=10),
+        before=before_log(logging.getLogger(), logging.WARN)
+    )
+    async def crawl(self, url=None):
         """
         :type url: str
-        :type retry: int
         :return:
         """
 
@@ -66,32 +75,19 @@ class CrawlerMixin(object):
 
         # 3: check if there is videos
         if not videos:
-            if not retry:
-                self.logger.critical("Can't find videos from {}, after 20 try.".format(url))
-                exit(1)
+            raise ValueError('No videos found')
 
-            delay = (20 - retry) ** 1.5 + 10
-            retry -= 1
-            self.logger.warning(
-                'Found 0 videos on {}, {} try left, waiting {} seconds...'.format(
-                    url, retry, delay
-                )
-            )
+        # 4: find next page url from previously downloaded page
+        next_page = find_next_page(tree, self.next_page_selector)
 
-            await asyncio.sleep(delay)
-            await self.crawl(url, retry)
-        else:
-            # 4: find next page url from previously downloaded page
-            next_page = find_next_page(tree, self.next_page_selector)
+        self.logger.info('-' * 60)
 
-            self.logger.info('-' * 60)
+        if self.already_existing_videos_count == prev_already_existing_videos_count:
+            self.logger.info('0 videos were created from last crawl, now exiting...')
+            return
 
-            if self.already_existing_videos_count == prev_already_existing_videos_count:
-                self.logger.info('0 videos were created from last crawl, now exiting...')
-                return
-
-            url = self.site_url + next_page
-            await self.crawl(url)
+        url = self.site_url + next_page
+        await self.crawl(url)
 
     async def crawl_convert_video_duration_to_seconds(self, duration):
         """
@@ -191,6 +187,10 @@ class CrawlerMixin(object):
 
         await asyncio.gather(*tasks)
 
+    @retry(
+        stop=stop_after_attempt(20), wait=wait_fixed(5) + wait_exponential(multiplier=1, max=10),
+        before=before_log(logging.getLogger(), logging.WARN)
+    )
     async def _fetch_video_page_and_find_metadata(self, video):
         """
         :type video: Video
