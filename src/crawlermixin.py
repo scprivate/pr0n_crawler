@@ -73,7 +73,7 @@ class CrawlerMixin(object):
             raise ValueError('No videos found')
 
         # 4: find next page url from previously downloaded page
-        next_page = find_next_page(tree, self.next_page_selector)
+        prev_page = find_prev_page(tree, self.prev_page_selector)
 
         self.logger.info('-' * 60)
 
@@ -81,7 +81,7 @@ class CrawlerMixin(object):
             self.logger.info('0 videos were created from last crawl, now exiting...')
             return
 
-        url = self.site_url + next_page
+        url = self.site_url + prev_page
         await self.crawl(url)
 
     async def crawl_convert_video_duration_to_seconds(self, duration):
@@ -250,11 +250,11 @@ class CrawlerMixin(object):
         return self.crawler_selectors.get('video_details').get('tags')
 
     @property
-    def next_page_selector(self):
+    def prev_page_selector(self):
         """
         :rtype: str
         """
-        return self.crawler_selectors.get('next_page')
+        return self.crawler_selectors.get('prev_page')
 
 
 def find_videos_title(tree, video_title_selector):
@@ -309,14 +309,14 @@ def find_video_details(tree, selectors):
     )
 
 
-def find_next_page(tree, next_page_selector):
+def find_prev_page(tree, prev_page_selector):
     """
     :type tree: lxml.html.Element
-    :type next_page_selector: str
+    :type prev_page_selector: str
     :rtype: str
     """
 
-    return tree.xpath(next_page_selector)[0]
+    return tree.xpath(prev_page_selector)[0]
 
 
 def save_video_details(video, details):
