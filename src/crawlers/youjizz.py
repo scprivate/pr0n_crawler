@@ -23,8 +23,8 @@ class YoujizzCrawler(CrawlerMixin):
         )
     )
 
-    def crawl_convert_video_duration_to_seconds(self, duration: str):
-        if duration == 'N/A':
+    def crawl_convert_video_duration_to_seconds(self, duration):
+        if not duration or duration == 'N/A' or duration == 'None':
             return 0
 
         return helpers.hms_to_s(duration)
