@@ -3,5 +3,6 @@ DATABASE = {
     'DATABASE': 'foo',
     'USER': 'root',
     'PASSWORD': 'root',
-    'CHARSET': 'utf8mb4'
+    'CHARSET': 'utf8mb4',
+    'COLLATION': 'utf8mb4_unicode_ci'
 }

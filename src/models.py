@@ -11,12 +11,16 @@ __all__ = [
 ]
 
 db = MySQLDatabase(
-    host=DATABASE.get('HOST'),
-    database=DATABASE.get('DATABASE'),
-    charset=DATABASE.get('CHARSET'),
-    user=DATABASE.get('USER'),
-    password=DATABASE.get('PASSWORD')
+    host=DATABASE['HOST'],
+    database=DATABASE['DATABASE'],
+    charset=DATABASE['CHARSET'],
+    user=DATABASE['USER'],
+    password=DATABASE['PASSWORD']
 )
+
+db.execute_sql("SET NAMES %s COLLATE %s;", (
+    DATABASE['CHARSET'], DATABASE['COLLATION']
+))
 
 
 class Site(Model):
