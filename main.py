@@ -18,7 +18,7 @@ def create_logger() -> logging.Logger:
 
     ch.setFormatter(ColoredFormatter(
         '[%(log_color)s%(levelname)s%(reset)s] %(bold)s%(site_name)s%(reset)s'
-        ' (%(videos_current_number)s/%(videos_max_number)s) : %(message)s'
+        ' (%(videos_current_number)s): %(message)s'
     ))
 
     root.addHandler(ch)

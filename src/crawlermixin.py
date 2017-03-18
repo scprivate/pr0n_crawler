@@ -15,9 +15,6 @@ class CrawlerMixin(object):
     site_url = None  # type: str
     crawler_entry_point = None  # type: str
     crawler_selectors = dict()  # type: dict[str, str | dict[str, str]]
-    crawler_max_videos = 9000
-
-    already_existing_videos_count = 0
 
     def __init__(self):
         self.crawler_current_videos = 0
@@ -47,12 +44,6 @@ class CrawlerMixin(object):
         if not url:
             url = self.site_url + self.crawler_entry_point
 
-        if self.crawler_current_videos >= self.crawler_max_videos:
-            self.logger.info('Max videos number reached, end.')
-            return
-
-        prev_already_existing_videos_count = self.already_existing_videos_count
-
         # 1: download videos page
         [_, tree] = await self._download_videos_page(url)
 
@@ -77,10 +68,6 @@ class CrawlerMixin(object):
 
         self.logger.info('-' * 60)
 
-        if self.already_existing_videos_count == prev_already_existing_videos_count:
-            self.logger.info('0 videos were created from last crawl, now exiting...')
-            return
-
         url = self.site_url + prev_page
         await self.crawl(url)
 
@@ -96,7 +83,6 @@ class CrawlerMixin(object):
         self.logger = logging.LoggerAdapter(logging.getLogger('pr0n_crawler'), {
             'site_name': self.site_name,
             'videos_current_number': self.crawler_current_videos,
-            'videos_max_number': self.crawler_max_videos,
         })
 
     async def _download_videos_page(self, url):
@@ -164,9 +150,6 @@ class CrawlerMixin(object):
                 site=self.site
             )
             videos.append(video)
-
-            if created:
-                self.already_existing_videos_count += 1
 
         return videos
 
