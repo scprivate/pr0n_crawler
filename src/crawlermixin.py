@@ -35,7 +35,7 @@ class CrawlerMixin(object):
             self.logger.info('Site created.')
 
     @retry(
-        stop=stop_after_attempt(20), wait=wait_random(32, 4096),
+        stop=stop_after_attempt(20), wait=wait_random(8, 512),
         before=before_log(logging.getLogger(), logging.WARN)
     )
     async def crawl(self, url=None):
@@ -183,7 +183,7 @@ class CrawlerMixin(object):
         await asyncio.gather(*tasks)
 
     @retry(
-        stop=stop_after_attempt(20), wait=wait_random(32, 4096),
+        stop=stop_after_attempt(20), wait=wait_random(8, 512),
         before=before_log(logging.getLogger(), logging.WARN)
     )
     async def _fetch_video_page_and_find_metadata(self, video):
