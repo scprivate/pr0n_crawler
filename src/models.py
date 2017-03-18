@@ -1,4 +1,4 @@
-from playhouse.fields import ManyToManyField, Model, CharField, ForeignKeyField, IntegerField, MySQLDatabase
+from playhouse.fields import ManyToManyField, Model, CharField, ForeignKeyField, IntegerField, MySQLDatabase, TextField
 
 from config import DATABASE
 
@@ -42,10 +42,10 @@ class Tag(Model):
 
 
 class Video(Model):
-    title = CharField()
+    title = TextField()
     duration = IntegerField()
-    url = CharField()
-    thumbnail_url = CharField()
+    url = TextField()
+    thumbnail_url = TextField()
 
     site = ForeignKeyField(Site)
     tags = ManyToManyField(Tag, related_name="videos")
