@@ -16,7 +16,7 @@ class CrawlerMixin(object):
     site_name = None  # type: str
     site_url = None  # type: str
     crawler_entry_point = None  # type: str
-    crawler_selectors = dict()  # type: dict[str, str | dict[str, str]]
+    crawler_selectors = dict()  # type: dict[str, str or dict[str, str]]
 
     def __init__(self):
         self.crawler_current_videos = 0
@@ -93,7 +93,7 @@ class CrawlerMixin(object):
             async with session.get(url) as response:
                 if response.status == 404:
                     self.logger.error('Can not download {}, got 404.'.format(url))
-                    exit(1)
+                    exit(1)  # TODO: not already handled case
                 else:
                     self.logger.info('Downloaded in {:.3f} seconds.'.format(time.time() - time_start))
                     content = await response.text()
@@ -204,44 +204,32 @@ class CrawlerMixin(object):
 
     @property
     def video_title_selector(self):
-        """
-        :rtype: str
-        """
+        """:rtype: str"""
         return self.crawler_selectors.get('video').get('title')
 
     @property
     def video_duration_selector(self):
-        """
-        :rtype: str
-        """
+        """:rtype: str"""
         return self.crawler_selectors.get('video').get('duration')
 
     @property
     def video_url_selector(self):
-        """
-        :rtype: str
-        """
+        """:rtype: str"""
         return self.crawler_selectors.get('video').get('url')
 
     @property
     def video_thumbnail_url_selector(self):
-        """
-        :rtype: str
-        """
+        """:rtype: str"""
         return self.crawler_selectors.get('video').get('thumbnail_url')
 
     @property
     def video_details_tags_selector(self):
-        """
-        :rtype: str
-        """
+        """:rtype: str"""
         return self.crawler_selectors.get('video_details').get('tags')
 
     @property
     def prev_page_selector(self):
-        """
-        :rtype: str
-        """
+        """:rtype: str"""
         return self.crawler_selectors.get('prev_page')
 
 
