@@ -43,35 +43,28 @@ class CrawlerMixin(object):
         :return:
         """
 
+        should_continue_download = True
+
         if not url:
             url = self.site_url + self.crawler_entry_point
 
-        # 1: download videos page
-        [_, tree] = await self._download_videos_page(url)
+        while should_continue_download:
+            tree = await self._download_videos_page(url)
+            videos = await self._find_videos_from_videos_page(url, tree)
 
-        # 2: find videos from previously downloaded page
-        self.logger.info('Finding videos metadata from {}...'.format(url))
-        time_start = time.time()
-        videos = await self._find_videos_from_videos_page(tree)
-        time_end = time.time()
+            if not videos:
+                raise ValueError('No videos found')
 
-        self.logger.info(
-            'Found videos metadata for {} videos in {:.3f} seconds.'.format(
-                len(videos),
-                time_end - time_start)
-        )
+            try:
+                prev_page = find_prev_page(tree, self.prev_page_selector)
+                url = self.site_url + prev_page
+            except IndexError:
+                should_continue_download = False
 
-        # 3: check if there is videos
-        if not videos:
-            raise ValueError('No videos found')
+            self.logger.info('-' * 60)
 
-        # 4: find next page url from previously downloaded page
-        prev_page = find_prev_page(tree, self.prev_page_selector)
-
-        self.logger.info('-' * 60)
-
-        url = self.site_url + prev_page
-        await self.crawl(url)
+        else:
+            self.logger.info('%s has been crawled!' % self.site_name)
 
     async def crawl_convert_video_duration_to_seconds(self, duration):
         """
@@ -90,7 +83,7 @@ class CrawlerMixin(object):
     async def _download_videos_page(self, url):
         """
         :type url: str
-        :rtype: list[str, lxml.html.Element]
+        :rtype: lxml.html.Element
         """
 
         self.logger.info('Downloading {}...'.format(url))
@@ -105,17 +98,27 @@ class CrawlerMixin(object):
                     self.logger.info('Downloaded in {:.3f} seconds.'.format(time.time() - time_start))
                     content = await response.text()
                     tree = html.fromstring(content)
-                    return [content, tree]
+                    return tree
 
-    async def _find_videos_from_videos_page(self, tree):
+    async def _find_videos_from_videos_page(self, url, tree):
         """
+        :type url: str
         :type tree: lxml.html.Element
         :rtype: list[Video]
         """
 
+        self.logger.info('Finding videos metadata from {}...'.format(url))
+        time_start = time.time()
+
         videos_metadata = self._fetch_videos_page_and_find_metadata(tree)
         videos = self._get_or_create_videos_from_metadata(videos_metadata)
         await self._find_more_videos_metadata(videos)
+
+        self.logger.info(
+            'Found videos metadata for {} videos in {:.3f} seconds.'.format(
+                len(videos),
+                time.time() - time_start)
+        )
 
         return videos
 
