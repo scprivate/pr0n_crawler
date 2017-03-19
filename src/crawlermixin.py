@@ -33,10 +33,6 @@ class CrawlerMixin(object):
         if created:
             self.logger.info('Site created.')
 
-    @retry(
-        stop=stop_after_attempt(20), wait=wait_random(8, 512),
-        before=before_log(logging.getLogger(), logging.WARN)
-    )
     async def crawl(self, url=None):
         """
         :type url: str
@@ -49,22 +45,30 @@ class CrawlerMixin(object):
             url = self.site_url + self.crawler_entry_point
 
         while should_continue_download:
-            tree = await self._download_videos_page(url)
-            videos = await self._find_videos_from_videos_page(url, tree)
-
-            if not videos:
-                raise ValueError('No videos found')
-
-            try:
-                prev_page = find_prev_page(tree, self.prev_page_selector)
-                url = self.site_url + prev_page
-            except IndexError:
-                should_continue_download = False
-
-            self.logger.info('-' * 60)
-
+            [url, should_continue_download] = await self._download(url)
         else:
             self.logger.info('%s has been crawled!' % self.site_name)
+
+    @retry(
+        stop=stop_after_attempt(20), wait=wait_random(8, 512),
+        before=before_log(logging.getLogger(), logging.WARN)
+    )
+    async def _download(self, url):
+        should_continue_download = True
+        tree = await self._download_videos_page(url)
+        videos = await self._find_videos_from_videos_page(url, tree)
+
+        if not videos:
+            raise ValueError('No videos found')
+
+        try:
+            prev_page = find_prev_page(tree, self.prev_page_selector)
+            url = self.site_url + prev_page
+        except IndexError:
+            should_continue_download = False
+
+        self.logger.info('-' * 60)
+        return [url, should_continue_download]
 
     async def crawl_convert_video_duration_to_seconds(self, duration):
         """
