@@ -10,6 +10,7 @@ from tenacity import before_log, retry, stop_after_attempt, wait_random
 from src.finders import find_video_details, find_videos_title, find_videos_url, find_videos_thumbnail_url, \
     find_videos_duration, find_prev_page
 from src.models import Video, Site, Tag, VideoTag
+from src import tumblr
 
 
 class CrawlerMixin(object):
@@ -33,6 +34,8 @@ class CrawlerMixin(object):
         if created:
             self.logger.info('Site created.')
 
+        self.created_videos_on_crawl = []
+
     async def crawl(self, url=None):
         """
         :type url: str
@@ -45,7 +48,11 @@ class CrawlerMixin(object):
             url = self.site_url + self.crawler_entry_point
 
         while should_continue_download:
+            self.created_videos_on_crawl = []
             [url, should_continue_download] = await self._download(url)
+
+            for video in self.created_videos_on_crawl:
+                tumblr.post(video)
         else:
             self.logger.info('%s has been crawled!' % self.site_name)
 
@@ -159,6 +166,8 @@ class CrawlerMixin(object):
                 site=self.site
             )
             videos.append(video)
+            if created:
+                self.created_videos_on_crawl.append(video)
 
         return videos
 

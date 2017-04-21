@@ -6,3 +6,11 @@ DATABASE = {
     'CHARSET': 'utf8mb4',
     'COLLATION': 'utf8mb4_unicode_ci'
 }
+
+TUMBLR = {
+    'CONSUMER_KEY': '',
+    'CONSUMER_SECRET': '',
+    'OAUTH_TOKEN': '',
+    'OAUTH_SECRET': '',
+    'DOMAIN': '',
+}
