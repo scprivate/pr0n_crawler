@@ -7,19 +7,19 @@ class YoujizzCrawler(CrawlerMixin):
     site_url = 'https://www.youjizz.com'
     site_favicon_url = site_url + '/favicon.ico'
 
-    crawler_entry_point = '/page/1000.html'
+    crawler_entry_point = '/newest-clips/300.html'
     crawler_selectors = dict(
         prev_page='(//*[@id="pagination"]/span/preceding-sibling::a/@href)[last()]',
 
         video=dict(
-            title='//*[@id="title1"]/text()',
-            duration='//*[@id="title2"]/span[1]/span/text()',
-            url='//*[@id="min"]/a/@href',
-            thumbnail_url='//*[@id="min"]/img[@class="lazy"]/@data-original',
+            title='//*[contains(@class, "video-title")]/a/text()',
+            duration='//*[contains(@class, "time")]/text()',
+            url='//*[contains(@class, "video-title")]/a/@href',
+            thumbnail_url='//a[@class="frame"]/img[contains(@class, "lazy")]/@data-original',
         ),
 
         video_details=dict(
-            tags='//*[@id="tags1"]/a/text()',
+            tags='//*[contains(@class, "tag-links desktop-only")]/ul/li/a/text()',
         )
     )
 
