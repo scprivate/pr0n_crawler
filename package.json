@@ -1,0 +1,9 @@
+{
+  "name": "pr0n_crawler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Kocal/pr0n_crawler.git",
+  "author": "Hugo Alliaume <kocal@live.fr>",
+  "license": "MIT",
+  "private": true
+}
