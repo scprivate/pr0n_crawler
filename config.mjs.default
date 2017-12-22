@@ -1,3 +1,9 @@
-export const jwtToken = '...';
+const isProduction = process.env.NODE_ENV === 'production';
 
-export const graphqlEndpoint = 'https://example.com/graphql/';
+export const jwtToken = isProduction
+  ? '<JWT Token for production>'
+  : '<JWT Token for development>';
+
+export const graphqlEndpoint = isProduction
+  ? 'https://example.com/graphql/'
+  : 'http://localhost:8000/graphql/';
