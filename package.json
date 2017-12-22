@@ -6,6 +6,10 @@
   "author": "Hugo Alliaume <kocal@live.fr>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "crawl": "cross-env NODE_ENV=production node -r @std/esm main.mjs",
+    "crawl:dev": "cross-env NODE_ENV=development node -r @std/esm main.mjs"
+  },
   "dependencies": {
     "@std/esm": "^0.18.0",
     "axios": "^0.17.1"
