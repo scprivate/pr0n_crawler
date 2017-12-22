@@ -7,12 +7,13 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "crawl": "cross-env NODE_ENV=production node -r @std/esm main.mjs",
-    "crawl:dev": "cross-env NODE_ENV=development node -r @std/esm main.mjs"
+    "crawl": "cross-env NODE_ENV=production ts-node main.ts",
+    "crawl:dev": "cross-env NODE_ENV=development ts-node main.ts"
   },
   "dependencies": {
-    "@std/esm": "^0.18.0",
-    "axios": "^0.17.1"
+    "axios": "^0.17.1",
+    "ts-node": "^4.0.2",
+    "typescript": "^2.6.2"
   },
   "devDependencies": {
     "cross-env": "^5.1.3"
