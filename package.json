@@ -9,5 +9,8 @@
   "dependencies": {
     "@std/esm": "^0.18.0",
     "axios": "^0.17.1"
+  },
+  "devDependencies": {
+    "cross-env": "^5.1.3"
   }
 }
