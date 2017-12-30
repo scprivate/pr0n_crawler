@@ -8,7 +8,22 @@
   "private": true,
   "scripts": {
     "crawl": "cross-env NODE_ENV=production ts-node main.ts",
-    "crawl:dev": "cross-env NODE_ENV=development ts-node main.ts"
+    "crawl:dev": "cross-env NODE_ENV=development ts-node main.ts",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   },
   "dependencies": {
     "axios": "^0.17.1",
