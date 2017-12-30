@@ -17,7 +17,7 @@ class TemplateSite extends Site {
     return 'https://www.template.com/last/100.html';
   }
 
-  public getFields(): SiteFields {
+  public getFields(): ISiteFields {
     return {
       previousPage: {
         selector: '',
@@ -25,11 +25,11 @@ class TemplateSite extends Site {
       },
       videosUrl: {
         selector: '',
-        normalizer: (urls: Array<string>) => urls,
+        normalizer: (urls: string[]) => urls,
       },
       videosThumbnailUrl: {
         selector: '',
-        normalizer: (thumbnailsUrl: Array<string>) => thumbnailsUrl,
+        normalizer: (thumbnailsUrl: string[]) => thumbnailsUrl,
       },
       video: {
         title: {
@@ -42,7 +42,7 @@ class TemplateSite extends Site {
         },
         tags: {
           selector: '',
-          normalizer: (tags: Array<string>) => tags,
+          normalizer: (tags: string[]) => tags,
         },
       },
     };

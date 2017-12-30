@@ -1,31 +1,31 @@
-interface SiteFields {
+interface ISiteFields {
   previousPage: {
     selector: string,
-    normalizer?(previousPage: string): string
-  }
+    normalizer?(previousPage: string): string,
+  };
 
   videosUrl: {
     selector: string,
-    normalizer?(urls: Array<string>): Array<string>
-  }
+    normalizer?(urls: string[]): string[],
+  };
 
   videosThumbnailUrl: {
     selector: string,
-    normalizer?(thumbnailUrls: Array<string>): Array<string>
-  }
+    normalizer?(thumbnailUrls: string[]): string[],
+  };
 
   video: {
     title: {
       selector: string,
-      normalizer?(title: string): string
+      normalizer?(title: string): string,
     }
     duration: {
       selector: string,
-      normalizer?(duration: string): Number
+      normalizer?(duration: string): number,
     }
     tags: {
       selector: string,
-      normalizer?(tags: Array<string>): Array<string>
-    }
-  }
+      normalizer?(tags: string[]): string[],
+    },
+  };
 }

@@ -17,7 +17,7 @@ class YouJizzSite extends Site {
     return 'https://www.youjizz.com/newest-clips/100.html';
   }
 
-  public getFields(): SiteFields {
+  public getFields(): ISiteFields {
     return {
       previousPage: {
         selector: '(//ul[contains(@class, "pagination")]/li[contains(@class, "active")]/a/@href)[last()]',
@@ -25,11 +25,11 @@ class YouJizzSite extends Site {
       },
       videosUrl: {
         selector: '//*[contains(@class, "video-title")]/a/@href',
-        normalizer: (urls: Array<string>) => urls.map(url => String(new URL(url, this.getUrl()))),
+        normalizer: (urls: string[]) => urls.map(url => String(new URL(url, this.getUrl()))),
       },
       videosThumbnailUrl: {
         selector: '',
-        normalizer: (thumbnailsUrl: Array<string>) => thumbnailsUrl,
+        normalizer: (thumbnailsUrl: string[]) => thumbnailsUrl,
       },
       video: {
         title: {
@@ -42,7 +42,7 @@ class YouJizzSite extends Site {
         },
         tags: {
           selector: '',
-          normalizer: (tags: Array<string>) => tags,
+          normalizer: (tags: string[]) => tags,
         },
       },
     };

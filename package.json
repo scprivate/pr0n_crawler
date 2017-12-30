@@ -10,7 +10,7 @@
     "crawl": "cross-env NODE_ENV=production ts-node main.ts",
     "crawl:dev": "cross-env NODE_ENV=development ts-node main.ts",
     "test": "jest",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'"
+    "lint": "tslint -p tsconfig.json 'src/**/*.ts'"
   },
   "jest": {
     "transform": {

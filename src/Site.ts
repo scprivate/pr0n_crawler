@@ -7,7 +7,7 @@ abstract class Site {
 
   public abstract getEntryPoint(): string;
 
-  public abstract getFields(): SiteFields;
+  public abstract getFields(): ISiteFields;
 }
 
 export { Site };
