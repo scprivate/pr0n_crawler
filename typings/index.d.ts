@@ -1,12 +1,4 @@
-export interface SiteOptions {
-  name: string;
-  url: string;
-  favicon: string;
-  entryPoint: string;
-  fields: SiteOptionsFields
-}
-
-interface SiteOptionsFields {
+interface SiteFields {
   previousPage: {
     selector: string,
     normalizer?(previousPage: string): string
@@ -17,6 +9,11 @@ interface SiteOptionsFields {
     normalizer?(urls: Array<string>): Array<string>
   }
 
+  videosThumbnailUrl: {
+    selector: string,
+    normalizer?(thumbnailUrls: Array<string>): Array<string>
+  }
+
   video: {
     title: {
       selector: string,
@@ -25,10 +22,6 @@ interface SiteOptionsFields {
     duration: {
       selector: string,
       normalizer?(duration: string): Number
-    }
-    thumbnailUrl: {
-      selector: string,
-      normalizer?(thumbnailUrl: string): string
     }
     tags: {
       selector: string,
