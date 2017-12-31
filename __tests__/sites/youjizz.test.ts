@@ -10,7 +10,7 @@ describe('Site - YouJizz', () => {
   describe('entry point', () => {
     let extractor;
 
-    beforeEach(async (done) => {
+    beforeAll(async (done) => {
       const content = await readFile(`${fixtures}/youjizz-entry-point.html`, 'utf8');
       extractor = new Extractor(youjizz, content);
 

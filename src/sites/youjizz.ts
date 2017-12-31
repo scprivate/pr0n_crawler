@@ -20,7 +20,7 @@ class YouJizzSite extends Site {
   public getFields(): ISiteFields {
     return {
       previousPage: {
-        selector: '(//ul[contains(@class, "pagination")]/li[contains(@class, "active")]/a/@href)[last()]',
+        selector: '(//ul[contains(@class, "pagination")]/li[contains(@class, "active")]/preceding-sibling::li/a/@href)[last()]',
         normalizer: (previousPage: string) => String(new URL(previousPage, this.getUrl())),
       },
       videosUrl: {
@@ -28,8 +28,8 @@ class YouJizzSite extends Site {
         normalizer: (urls: string[]) => urls.map(url => String(new URL(url, this.getUrl()))),
       },
       videosThumbnailUrl: {
-        selector: '',
-        normalizer: (thumbnailsUrl: string[]) => thumbnailsUrl,
+        selector: '//*[contains(@class, "video-item")]/div/a/img[contains(@class, "lazy")]/@data-original',
+        normalizer: (thumbnailsUrl: string[]) => thumbnailsUrl.map(url => String(new URL(url, this.getUrl()))),
       },
       video: {
         title: {
