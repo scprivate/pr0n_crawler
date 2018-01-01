@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Site - YouJizz entry point it should extracts previousPage 1`] = `"https://www.youjizz.com/newest-clips/99.html"`;
+exports[`Site - YouJizz entry point should extracts previousPage 1`] = `"https://www.youjizz.com/newest-clips/99.html"`;
 
-exports[`Site - YouJizz entry point it should extracts videosThumbnailUrl 1`] = `
+exports[`Site - YouJizz entry point should extracts videosThumbnailUrl 1`] = `
 Array [
   "https://cdne-pics.youjizz.com/f/4/7/f47dc3f9ee5f0930264933945c8298541496219703-960-540-2099-h264.mp4-3.jpg",
   "https://cdne-pics.youjizz.com/a/0/8/a084a3bdc08964db9a42b5b30c8620461513059926-1920-1080-9876-h264.mp4-4.jpg",
@@ -55,7 +55,7 @@ Array [
 ]
 `;
 
-exports[`Site - YouJizz entry point it should extracts videosUrl 1`] = `
+exports[`Site - YouJizz entry point should extracts videosUrl 1`] = `
 Array [
   "https://www.youjizz.com/videos/having-fun-with-boyfriends-friend-41212501.html",
   "https://www.youjizz.com/videos/i-am-going-to-fuck-your-wife-p3-44980291.html",
@@ -107,3 +107,26 @@ Array [
   "https://www.youjizz.com/videos/seline-benazir-gets-horny-and-fucks-herself-with-a-gigantic-34514031.html",
 ]
 `;
+
+exports[`Site - YouJizz video should extract duration 1`] = `420`;
+
+exports[`Site - YouJizz video should extract tags 1`] = `
+Array [
+  "gokartkatfight",
+  "go kart kat fight",
+  "charisma cappelli",
+  "robyn truelove",
+  "keiran lee",
+  "sports",
+  "big tits worship",
+  "threesome",
+  "big tits",
+  "medium ass",
+  "blonde",
+  "pornstar",
+  "hardcore",
+  "blowjobs",
+]
+`;
+
+exports[`Site - YouJizz video should extract title 1`] = `"Go Kart Kat Fight"`;

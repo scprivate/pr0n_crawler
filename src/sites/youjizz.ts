@@ -1,3 +1,4 @@
+import * as sec from 'sec';
 import { Site } from '../Site';
 
 class YouJizzSite extends Site {
@@ -20,7 +21,7 @@ class YouJizzSite extends Site {
   public getFields(): ISiteFields {
     return {
       previousPage: {
-        selector: '(//ul[contains(@class, "pagination")]/li[contains(@class, "active")]/preceding-sibling::li/a/@href)[last()]',
+        selector: '(//*[contains(@class, "pagination")]/li[contains(@class, "active")]/preceding-sibling::li/a/@href)[last()]',
         normalizer: (previousPage: string) => String(new URL(previousPage, this.getUrl())),
       },
       videosUrl: {
@@ -33,16 +34,14 @@ class YouJizzSite extends Site {
       },
       video: {
         title: {
-          selector: '//*[contains(@class, "video-player")]/following-sibling::h3/text()',
-          normalizer: (title: string) => title,
+          selector: '//title/text()',
         },
         duration: {
-          selector: '',
-          normalizer: (duration: string) => Number(duration),
+          selector: '(//*[contains(@class, "video-info")]/div[3]/text())[last()]',
+          normalizer: (duration: string) => sec(duration),
         },
         tags: {
-          selector: '',
-          normalizer: (tags: string[]) => tags,
+          selector: '(//*[contains(@class, "tag-links")])[last()]/ul/li[contains(@class, "red-li")]/a/text()',
         },
       },
     };

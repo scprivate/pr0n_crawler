@@ -18,7 +18,7 @@ class Extractor {
       throw new ExtractorError(this.site, 'No previous page found.');
     }
 
-    const previousPage = node.value;
+    const previousPage = (node as Node).nodeValue;
 
     return typeof normalizer === 'function' ? normalizer(previousPage) : previousPage;
   }
@@ -31,7 +31,7 @@ class Extractor {
       throw new ExtractorError(this.site, 'No videos found.');
     }
 
-    const videosUrl = nodes.map(node => node.value);
+    const videosUrl = nodes.map(node => (node as Node).nodeValue);
 
     return typeof normalizer === 'function' ? normalizer(videosUrl) : videosUrl;
   }
@@ -44,9 +44,48 @@ class Extractor {
       throw new ExtractorError(this.site, 'No thumbnails found.');
     }
 
-    const videosUrl = nodes.map(node => node.value);
+    const videosUrl = nodes.map(node => (node as Node).nodeValue);
 
     return typeof normalizer === 'function' ? normalizer(videosUrl) : videosUrl;
+  }
+
+  public extractVideoTitle(): string {
+    const { selector, normalizer } = this.site.getFields().video.title;
+    const node = xpath.select(selector, this.doc, true);
+
+    if (node === undefined) {
+      throw new ExtractorError(this.site, 'No title found for video.');
+    }
+
+    const title = (node as Node).nodeValue;
+
+    return typeof normalizer === 'function' ? normalizer(title) : title;
+  }
+
+  public extractVideoDuration(): number | string {
+    const { selector, normalizer } = this.site.getFields().video.duration;
+    const node = xpath.select(selector, this.doc, true);
+
+    if (node === undefined) {
+      throw new ExtractorError(this.site, 'No duration found for video.');
+    }
+
+    const duration = (node as Node).nodeValue.trim();
+
+    return typeof normalizer === 'function' ? normalizer(duration) : duration;
+  }
+
+  public extractVideoTags(): string[] {
+    const { selector, normalizer } = this.site.getFields().video.tags;
+    const nodes = xpath.select(selector, this.doc);
+
+    if (nodes.length === 0) {
+      throw new ExtractorError(this.site, 'No tags found for video.');
+    }
+
+    const tags = nodes.map(node => (node as Node).nodeValue);
+
+    return typeof normalizer === 'function' ? normalizer(tags) : tags;
   }
 }
 

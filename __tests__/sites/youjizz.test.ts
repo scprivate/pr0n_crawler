@@ -17,16 +17,39 @@ describe('Site - YouJizz', () => {
       done();
     });
 
-    it('it should extracts previousPage', () => {
+    it('should extracts previousPage', () => {
       expect(extractor.extractPreviousPage()).toMatchSnapshot();
     });
 
-    it('it should extracts videosUrl', () => {
+    it('should extracts videosUrl', () => {
       expect(extractor.extractVideosUrl()).toMatchSnapshot();
     });
 
-    it('it should extracts videosThumbnailUrl', () => {
+    it('should extracts videosThumbnailUrl', () => {
       expect(extractor.extractVideosThumbnailUrl()).toMatchSnapshot();
+    });
+  });
+
+  describe('video', () => {
+    let extractor;
+
+    beforeAll(async (done) => {
+      const content = await readFile(`${fixtures}/youjizz-video.html`, 'utf8');
+      extractor = new Extractor(youjizz, content);
+
+      done();
+    });
+
+    it('should extracts title', () => {
+      expect(extractor.extractVideoTitle()).toMatchSnapshot();
+    });
+
+    it('should extracts duration', () => {
+      expect(extractor.extractVideoDuration()).toMatchSnapshot();
+    });
+
+    it('should extracts tags', () => {
+      expect(extractor.extractVideoTags()).toMatchSnapshot();
     });
   });
 });
