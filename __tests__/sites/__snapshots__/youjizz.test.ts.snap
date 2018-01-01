@@ -108,9 +108,11 @@ Array [
 ]
 `;
 
-exports[`Site - YouJizz video should extract duration 1`] = `420`;
+exports[`Site - YouJizz entry point should not extracts previousPage if we are in the last entry point 1`] = `"[Extractor] YouJizz: No previous page found."`;
 
-exports[`Site - YouJizz video should extract tags 1`] = `
+exports[`Site - YouJizz video should extracts duration 1`] = `420`;
+
+exports[`Site - YouJizz video should extracts tags 1`] = `
 Array [
   "gokartkatfight",
   "go kart kat fight",
@@ -129,4 +131,4 @@ Array [
 ]
 `;
 
-exports[`Site - YouJizz video should extract title 1`] = `"Go Kart Kat Fight"`;
+exports[`Site - YouJizz video should extracts title 1`] = `"Go Kart Kat Fight"`;

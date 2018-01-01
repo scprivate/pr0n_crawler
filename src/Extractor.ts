@@ -1,6 +1,7 @@
 import { DOMParser } from 'xmldom';
 import * as xpath from 'xpath';
 import ExtractorError from './errors/ExtractorError';
+import ExtractorNoPreviousPageFoundError from './errors/ExtractorNoPreviousPageFoundError';
 import { Site } from './Site';
 
 class Extractor {
@@ -15,7 +16,7 @@ class Extractor {
     const node = xpath.select(selector, this.doc, true);
 
     if (node === undefined) {
-      throw new ExtractorError(this.site, 'No previous page found.');
+      throw new ExtractorNoPreviousPageFoundError(this.site);
     }
 
     const previousPage = (node as Node).nodeValue;

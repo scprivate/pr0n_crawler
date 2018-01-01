@@ -1,4 +1,5 @@
 import { readFile } from 'async-file';
+import ExtractorNoPreviousPageFoundError from '../../src/errors/ExtractorNoPreviousPageFoundError';
 import { Extractor } from '../../src/Extractor';
 import { YouJizzSite } from '../../src/sites/youjizz';
 
@@ -27,6 +28,17 @@ describe('Site - YouJizz', () => {
 
     it('should extracts videosThumbnailUrl', () => {
       expect(extractor.extractVideosThumbnailUrl()).toMatchSnapshot();
+    });
+
+    it('should not extracts previousPage if we are in the last entry point', async (done) => {
+      const content = await readFile(`${fixtures}/youjizz-last-entry-point-before-stop.html`, 'utf8');
+      extractor = new Extractor(youjizz, content);
+
+      expect(() => {
+        extractor.extractPreviousPage();
+      }).toThrowErrorMatchingSnapshot();
+
+      done();
     });
   });
 
