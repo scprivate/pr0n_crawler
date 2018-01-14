@@ -10,21 +10,17 @@
     "crawl": "cross-env NODE_ENV=production ts-node main.ts",
     "crawl:dev": "cross-env NODE_ENV=development ts-node main.ts",
     "test": "jest",
-    "lint": "tslint -p tsconfig.json 'src/**/*.ts'"
+    "lint": "tslint -p tsconfig.json '{src,__tests__}/**/*.ts'",
+    "prettier": "prettier '{src,__tests__}/**.ts'",
+    "prettier:write": "npm run prettier -- --write",
+    "precommit": "pretty-quick --staged"
   },
   "jest": {
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
   },
   "dependencies": {
     "axios": "^0.17.1",
@@ -36,7 +32,10 @@
     "@types/jest": "^22.0.0",
     "async-file": "^2.0.2",
     "cross-env": "^5.1.3",
+    "husky": "^0.14.3",
     "jest": "^22.0.4",
+    "prettier": "1.10.2",
+    "pretty-quick": "^1.2.0",
     "ts-jest": "^22.0.0",
     "tslint": "^5.8.0",
     "tslint-config-airbnb": "^5.4.2",
