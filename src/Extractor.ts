@@ -92,6 +92,4 @@ class Extractor {
   }
 }
 
-export {
-  Extractor,
-};
+export { Extractor };
