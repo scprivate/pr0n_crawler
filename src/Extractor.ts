@@ -8,7 +8,9 @@ class Extractor {
   private doc: Node;
 
   constructor(private site: Site, private content: string) {
-    this.doc = new DOMParser().parseFromString(content);
+    this.doc = new DOMParser({
+      errorHandler: () => null,
+    }).parseFromString(content);
   }
 
   public extractPreviousPage(): string {
