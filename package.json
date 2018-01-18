@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "blessed": "^0.1.81",
     "sec": "^1.0.0",
     "ts-node": "^4.0.2",
     "typescript": "^2.6.2"
