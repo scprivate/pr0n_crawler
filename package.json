@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "apollo-client-preset": "^1.0.6",
+    "array.chunk": "^1.1.0",
     "axios": "^0.17.1",
     "blessed": "^0.1.81",
     "graphql": "^0.12.3",
@@ -32,7 +33,8 @@
     "react-apollo": "^2.0.4",
     "sec": "^1.0.0",
     "ts-node": "^4.0.2",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "zip-array": "^1.0.1"
   },
   "devDependencies": {
     "@types/jest": "^22.0.0",
