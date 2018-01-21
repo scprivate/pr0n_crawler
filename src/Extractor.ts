@@ -34,7 +34,7 @@ class Extractor {
       throw new ExtractorError(this.site, 'No videos found.');
     }
 
-    const videosUrl = nodes.map(node => (node as Node).nodeValue);
+    const videosUrl = nodes.map(node => (node as Node).nodeValue.trim());
 
     return typeof normalizer === 'function' ? normalizer(videosUrl) : videosUrl;
   }
@@ -47,7 +47,7 @@ class Extractor {
       throw new ExtractorError(this.site, 'No thumbnails found.');
     }
 
-    const videosUrl = nodes.map(node => (node as Node).nodeValue);
+    const videosUrl = nodes.map(node => (node as Node).nodeValue.trim());
 
     return typeof normalizer === 'function' ? normalizer(videosUrl) : videosUrl;
   }
@@ -60,12 +60,12 @@ class Extractor {
       throw new ExtractorError(this.site, 'No title found for video.');
     }
 
-    const title = (node as Node).nodeValue;
+    const title = (node as Node).nodeValue.trim();
 
     return typeof normalizer === 'function' ? normalizer(title) : title;
   }
 
-  public extractVideoDuration(): number | string {
+  public extractVideoDuration(): number {
     const { selector, normalizer } = this.site.getFields().video.duration;
     const node = xpath.select(selector, this.doc, true);
 
@@ -75,7 +75,7 @@ class Extractor {
 
     const duration = (node as Node).nodeValue.trim();
 
-    return typeof normalizer === 'function' ? normalizer(duration) : duration;
+    return typeof normalizer === 'function' ? normalizer(duration) : parseInt(duration, 10);
   }
 
   public extractVideoTags(): string[] {
@@ -86,7 +86,7 @@ class Extractor {
       throw new ExtractorError(this.site, 'No tags found for video.');
     }
 
-    const tags = nodes.map(node => (node as Node).nodeValue);
+    const tags = nodes.map(node => (node as Node).nodeValue.trim());
 
     return typeof normalizer === 'function' ? normalizer(tags) : tags;
   }
