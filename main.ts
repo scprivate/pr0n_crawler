@@ -3,7 +3,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
-import { graphqlEndpoint, jwtToken } from './config';
+import { apiKey, graphqlEndpoint } from './config';
 import { Crawler } from './src/Crawler';
 import { YouJizzSite } from './src/sites/youjizz';
 
@@ -12,7 +12,7 @@ const client = new ApolloClient({
     fetch,
     uri: graphqlEndpoint,
     headers: {
-      authorization: `Bearer ${jwtToken}`,
+      'x-auth-token': apiKey,
     },
   }),
   cache: new InMemoryCache(),
