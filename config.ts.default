@@ -6,4 +6,4 @@ export const apiKey = isProduction
 
 export const graphqlEndpoint = isProduction
   ? 'https://example.com/graphql/'
-  : 'http://localhost:8000/graphql/';
+  : 'http://xxx.kocal.fr.vm/graphql/';
