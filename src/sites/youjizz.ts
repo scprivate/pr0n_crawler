@@ -31,7 +31,7 @@ class YouJizzSite extends Site {
         normalizer: (urls: string[]) => urls.map(url => String(resolveUrl(this.getUrl(), url))),
       },
       videosThumbnailUrl: {
-        selector: '//*[contains(@class, "video-item")]/div/a/img[contains(@class, "lazy")]/@data-original',
+        selector: '//*[contains(@class, "video-item")]/div/a/img[contains(@class, "img-responsive")]/@data-original',
         normalizer: (thumbnailsUrl: string[]) => thumbnailsUrl.map(url => String(resolveUrl(this.getUrl(), url))),
       },
       video: {
