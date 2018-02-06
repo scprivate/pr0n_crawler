@@ -24,13 +24,13 @@
   },
   "dependencies": {
     "apollo-client-preset": "^1.0.6",
-    "axios": "^0.17.1",
     "blessed": "^0.1.81",
     "graphql": "^0.12.3",
     "graphql-tag": "^2.6.1",
     "node-fetch": "^1.7.3",
     "react-apollo": "^2.0.4",
     "sec": "^1.0.0",
+    "sync-request": "^5.0.0",
     "ts-node": "^4.0.2",
     "typescript": "^2.6.2",
     "zip-array": "^1.0.1"
