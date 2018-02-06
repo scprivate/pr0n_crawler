@@ -27,7 +27,7 @@
     "blessed": "^0.1.81",
     "graphql": "^0.12.3",
     "graphql-tag": "^2.6.1",
-    "node-fetch": "^1.7.3",
+    "node-fetch": "^2.0.0",
     "react-apollo": "^2.0.4",
     "sec": "^1.0.0",
     "sync-request": "^5.0.0",
