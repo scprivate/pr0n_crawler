@@ -1,36 +1,32 @@
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
+import syncRequest from 'sync-request';
+import { zip } from 'zip-array';
+import { apiKey, graphqlEndpoint } from '../config';
+import { Site as SiteEntity } from './entities/Site';
 import { Video } from './entities/Video';
+import ExtractorNoPreviousPageFoundError from './errors/ExtractorNoPreviousPageFoundError';
 import { Extractor } from './Extractor';
 import { Site } from './Site';
-
-import axios from 'axios';
-import { zip } from 'zip-array';
-import { Site as SiteEntity } from './entities/Site';
-import ExtractorNoPreviousPageFoundError from './errors/ExtractorNoPreviousPageFoundError';
 
 class Crawler {
   private crawledPages: number;
   private crawledVideos: number;
 
-  constructor(private client: ApolloClient<NormalizedCacheObject>, private site: Site) {
+  constructor(private site: Site) {
     this.crawledPages = 0;
     this.crawledVideos = 0;
   }
 
-  public async crawl(url: string = this.site.getEntryPoint()) {
+  public crawl(url: string = this.site.getEntryPoint()) {
     console.log(`Fetching ${url}...`);
 
-    const extractor = new Extractor(this.site, (await axios(url)).data);
+    const extractor = new Extractor(this.site, syncRequest('GET', url).getBody('utf8'));
     const videos: Video[] = this.initVideos(extractor);
 
-    await Promise.all(
-      videos.map(async video => {
-        const response = await axios(video.url);
-        this.handleVideo(video, response.data);
-        this.crawledVideos += 1;
-      })
-    );
+    videos.map(async video => {
+      const response = syncRequest('GET', video.url);
+      this.handleVideo(video, response.getBody('utf8'));
+      this.crawledVideos += 1;
+    });
 
     this.crawledPages += 1;
     console.log(`Fetching ${url}: done.`);
@@ -71,6 +67,52 @@ class Crawler {
     video.title = videoExtractor.extractVideoTitle();
     video.tags = videoExtractor.extractVideoTags();
     video.duration = videoExtractor.extractVideoDuration();
+
+    const mutation = `
+      mutation CreateVideo($input: CreateVideoInput!) {
+        createVideo(input: $input) {
+          id title url thumbnailUrl duration
+          site { id name host }
+          tags { id tag slug }
+        }
+      }
+    `;
+
+    const variables = {
+      input: {
+        title: video.title,
+        url: video.url,
+        thumbnailUrl: video.thumbnailUrl,
+        duration: video.duration,
+        site: {
+          name: video.site.name,
+          host: video.site.url,
+        },
+        tags: video.tags,
+      },
+    };
+
+    console.log(`Sending video ${video.title} to GraphQL API...`);
+
+    const result = syncRequest('POST', graphqlEndpoint, {
+      headers: {
+        'x-auth-token': apiKey,
+      },
+      json: {
+        variables,
+        query: mutation,
+      },
+    });
+
+    try {
+      const body = result.getBody('utf8');
+      console.info(`Sending video ${video.title} to GraphQL API: done`);
+      console.info(body);
+    } catch (e) {
+      console.error(`Sending video ${video.title} to GraphQL API: error`);
+      console.error(e);
+      process.exit(1);
+    }
   }
 }
 

@@ -16,7 +16,7 @@ class YouJizzSite extends Site {
   }
 
   public getEntryPoint(): string {
-    return 'https://www.youjizz.com/newest-clips/100.html';
+    return 'https://www.youjizz.com/newest-clips/2.html';
   }
 
   public getFields(): ISiteFields {
