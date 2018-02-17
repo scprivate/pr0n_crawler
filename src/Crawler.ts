@@ -1,3 +1,4 @@
+import * as Logger from '@kocal/logger';
 import syncRequest from 'sync-request';
 import { zip } from 'zip-array';
 import { apiKey, graphqlEndpoint } from '../config';
@@ -11,13 +12,26 @@ class Crawler {
   private crawledPages: number;
   private crawledVideos: number;
 
-  constructor(private site: Site) {
+  constructor(private logger: Logger, private site: Site) {
     this.crawledPages = 0;
     this.crawledVideos = 0;
+
+    /* tslint:disable max-line-length */
+    this.logger.setFormat(
+      (ctx, vars) =>
+        `${ctx.luxon.toFormat('yyyy-LL-dd TT')} :: ${ctx.name} [P:${vars.pages}|V:${vars.videos}] :: ${ctx.levelColor(
+          ctx.level
+        )} :: ${ctx.message}`
+    );
+
+    this.logger.setVariables(() => ({
+      pages: this.crawledPages,
+      videos: this.crawledVideos,
+    }));
   }
 
   public crawl(url: string = this.site.getEntryPoint()) {
-    console.log(`Fetching ${url}...`);
+    this.logger.info(`Fetching ${url}...`);
 
     const extractor = new Extractor(this.site, syncRequest('GET', url).getBody('utf8'));
     const videos: Video[] = this.initVideos(extractor);
@@ -29,14 +43,14 @@ class Crawler {
     });
 
     this.crawledPages += 1;
-    console.log(`Fetching ${url}: done.`);
+    this.logger.info(`Fetching ${url}... done`);
 
     try {
       const previousPage = extractor.extractPreviousPage();
       this.crawl(previousPage);
     } catch (e) {
       if (e instanceof ExtractorNoPreviousPageFoundError) {
-        console.info(`Crawling ${this.site.getName()} done.`);
+        this.logger.info(`Crawling ${this.site.getName()}: done.`);
       } else {
         throw e;
       }
@@ -92,7 +106,7 @@ class Crawler {
       },
     };
 
-    console.log(`Sending video ${video.title} to GraphQL API...`);
+    this.logger.info(`Sending video ${video.title} to GraphQL API...`);
 
     const result = syncRequest('POST', graphqlEndpoint, {
       headers: {
@@ -106,10 +120,9 @@ class Crawler {
 
     try {
       const body = result.getBody('utf8');
-      console.info(`Sending video ${video.title} to GraphQL API: done`);
-      console.info(body);
+      this.logger.info(`Sending video ${video.title} to GraphQL API: done`);
     } catch (e) {
-      console.error(`Sending video ${video.title} to GraphQL API: error`);
+      this.logger.error(`Sending video ${video.title} to GraphQL API: error`);
       console.error(e);
       process.exit(1);
     }
