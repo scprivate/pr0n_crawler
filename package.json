@@ -23,7 +23,7 @@
     "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"]
   },
   "dependencies": {
-    "@kocal/logger": "^0.1.0",
+    "@kocal/logger": "^1.0.0",
     "blessed": "^0.1.81",
     "node-fetch": "^2.0.0",
     "sec": "^1.0.0",
