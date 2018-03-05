@@ -29,7 +29,7 @@
     "sec": "^1.0.0",
     "sync-request": "^5.0.0",
     "ts-node": "^5.0.0",
-    "typescript": "^2.6.2",
+    "typescript": "^2.7.2",
     "zip-array": "^1.0.1"
   },
   "devDependencies": {
