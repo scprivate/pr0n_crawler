@@ -33,7 +33,7 @@
     "zip-array": "^1.0.1"
   },
   "devDependencies": {
-    "@types/jest": "^22.0.0",
+    "@types/jest": "^22.1.4",
     "async-file": "^2.0.2",
     "cross-env": "^5.1.3",
     "husky": "^0.14.3",
