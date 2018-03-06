@@ -33,13 +33,9 @@
   version "22.1.4"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.1.4.tgz#5c0c06a9bb495c67e0a78002a952f151e2ae58a1"
 
-"@types/node@*", "@types/node@^9.3.0":
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.0.tgz#b85a0bcf1e1cc84eb4901b7e96966aedc6f078d1"
-
-"@types/node@^7.0.31":
-  version "7.0.52"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.52.tgz#8990d3350375542b0c21a83cd0331e6a8fc86716"
+"@types/node@*", "@types/node@^9.3.0", "@types/node@^9.4.1":
+  version "9.4.6"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.6.tgz#d8176d864ee48753d053783e4e463aec86b8d82e"
 
 "@types/node@^8.0.0":
   version "8.5.9"
@@ -1189,12 +1185,12 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-basic@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/http-basic/-/http-basic-6.0.0.tgz#1d63df8f891e1e25e0c2c84d7a2d94702d6ae229"
+http-basic@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/http-basic/-/http-basic-7.0.0.tgz#82f0a506be942732ec8deebee80e746ef5736dba"
   dependencies:
     "@types/concat-stream" "^1.6.0"
-    "@types/node" "^7.0.31"
+    "@types/node" "^9.4.1"
     caseless "~0.12.0"
     concat-stream "^1.4.6"
     http-response-object "^3.0.1"
@@ -2766,17 +2762,17 @@ symbol-tree@^3.2.1:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.2.tgz#ae27db38f660a7ae2e1c3b7d1bc290819b8519e6"
 
-sync-request@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/sync-request/-/sync-request-5.0.0.tgz#b815d5c6e16193392ec4139a4881db5e90e88676"
+sync-request@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/sync-request/-/sync-request-6.0.0.tgz#db867eccc4ed31bbcb9fa3732393a3413da582ed"
   dependencies:
     http-response-object "^3.0.1"
-    sync-rpc "^1.2.0"
-    then-request "^5.0.0"
+    sync-rpc "^1.2.1"
+    then-request "^6.0.0"
 
-sync-rpc@^1.2.0:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/sync-rpc/-/sync-rpc-1.2.3.tgz#af56b789ff812d70038d72d2f2658e25f7c3d89b"
+sync-rpc@^1.2.1:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/sync-rpc/-/sync-rpc-1.3.3.tgz#f72ec6da8aa6f1a7d4a69003711f528e275993f4"
   dependencies:
     get-port "^3.1.0"
 
@@ -2811,9 +2807,9 @@ test-exclude@^4.1.1:
     read-pkg-up "^1.0.1"
     require-main-filename "^1.0.1"
 
-then-request@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/then-request/-/then-request-5.0.0.tgz#7a23f616799597621de8cfebc77c61fd28c00d64"
+then-request@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/then-request/-/then-request-6.0.0.tgz#2cab198e48f2d8e79c8c1ed260198368a4a0bcba"
   dependencies:
     "@types/concat-stream" "^1.6.0"
     "@types/form-data" "0.0.33"
@@ -2822,7 +2818,7 @@ then-request@^5.0.0:
     caseless "~0.12.0"
     concat-stream "^1.6.0"
     form-data "^2.2.0"
-    http-basic "^6.0.0"
+    http-basic "^7.0.0"
     http-response-object "^3.0.1"
     promise "^8.0.0"
     qs "^6.4.0"
