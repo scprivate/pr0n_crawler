@@ -25,7 +25,7 @@
   "dependencies": {
     "@kocal/logger": "^1.0.0",
     "blessed": "^0.1.81",
-    "node-fetch": "^2.0.0",
+    "node-fetch": "^2.1.1",
     "sec": "^1.0.0",
     "sync-request": "^5.0.0",
     "ts-node": "^5.0.0",
