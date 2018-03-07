@@ -1,6 +1,6 @@
 import * as sec from 'sec';
-import { Site } from '../Site';
 import { resolve as resolveUrl } from 'url';
+import { Site } from '../Site';
 
 class YouJizzSite extends Site {
   public getUrl(): string {
